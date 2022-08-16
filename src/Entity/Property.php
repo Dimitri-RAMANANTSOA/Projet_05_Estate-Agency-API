@@ -8,64 +8,84 @@ use App\Repository\PropertyRepository;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: PropertyRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['property:read']]
+)]
 #[UniqueEntity('title')]
 class Property
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['media_object:read', 'property:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['media_object:read', 'property:read'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['property:read'])]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Groups(['property:read'])]
     private ?int $surface = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
+    #[Groups(['property:read'])]
     private ?int $room = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
+    #[Groups(['property:read'])]
     private ?int $bedroom = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
+    #[Groups(['property:read'])]
     private ?int $floor = null;
 
     #[ORM\Column]
+    #[Groups(['property:read'])]
     private ?int $price = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
+    #[Groups(['property:read'])]
     private ?int $heat = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['property:read'])]
     private ?string $city = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['property:read'])]
     private ?string $address = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['property:read'])]
     private ?string $postalcode = null;
 
     #[ORM\Column]
-    private ?bool $sold = null;
+    #[Groups(['property:read'])]
+    private ?bool $sold = false;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['property:read'])]
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['property:read'])]
     private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\ManyToMany(targetEntity: Options::class, inversedBy: 'properties')]
+    #[Groups(['property:read'])]
     private Collection $options;
 
-    #[ORM\OneToMany(mappedBy: 'property', targetEntity: Pictures::class)]
+    #[ORM\OneToMany(mappedBy: 'property', targetEntity: MediaObject::class, cascade: ["persist", "remove"])]
+    #[Groups(['property:read'])]
     private Collection $pictures;
 
     public function __construct()
@@ -225,14 +245,14 @@ class Property
         return $this;
     }
 
-    public function getCreatedat(): ?\DateTimeInterface
+    public function getcreatedAt(): ?\DateTimeInterface
     {
-        return $this->createdat;
+        return $this->createdAt;
     }
 
-    public function setCreatedat(\DateTimeInterface $createdat): self
+    public function setcreatedAt(\DateTimeInterface $createdAt): self
     {
-        $this->createdat = $createdat;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
@@ -274,14 +294,14 @@ class Property
     }
 
     /**
-     * @return Collection<int, Pictures>
+     * @return Collection<int, MediaObject>
      */
     public function getPictures(): Collection
     {
         return $this->pictures;
     }
 
-    public function addPicture(Pictures $picture): self
+    public function addPicture(MediaObject $picture): self
     {
         if (!$this->pictures->contains($picture)) {
             $this->pictures->add($picture);
@@ -291,7 +311,7 @@ class Property
         return $this;
     }
 
-    public function removePicture(Pictures $picture): self
+    public function removePicture(MediaObject $picture): self
     {
         if ($this->pictures->removeElement($picture)) {
             // set the owning side to null (unless already changed)

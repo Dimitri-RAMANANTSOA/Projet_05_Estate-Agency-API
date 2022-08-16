@@ -1,0 +1,15 @@
+App\Entity\Property:
+  property_{1..100}:
+    title: <words(4,true)>
+    description: <paragraph()>
+    surface: <numberBetween(25,400)>
+    room: <numberBetween(1,4)>
+    bedroom: <numberBetween(1,4)>
+    floor: <numberBetween(1,7)>
+    price: <numberBetween(60000, 1000000)>
+    heat: <numberBetween(0,1)>
+    city: <city()>
+    address: <streetAddress()>
+    postalcode: <postcode()>
+    createdAt: <dateTimeThisDecade()>
+    options: '[@Options_*]'

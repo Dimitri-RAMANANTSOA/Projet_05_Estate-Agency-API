@@ -1,0 +1,7 @@
+App\Entity\Options:
+  Options_1:
+    name: 'Balcon'
+  Options_2:
+    name: 'Adapté PMR'
+  Options_3:
+    name: 'Ascenseur'

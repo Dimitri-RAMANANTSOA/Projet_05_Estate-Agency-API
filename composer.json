@@ -29,7 +29,8 @@
         "symfony/serializer": "6.1.*",
         "symfony/twig-bundle": "6.1.*",
         "symfony/validator": "6.1.*",
-        "symfony/yaml": "6.1.*"
+        "symfony/yaml": "6.1.*",
+        "vich/uploader-bundle": "^1.21"
     },
     "config": {
         "allow-plugins": {
@@ -84,6 +85,7 @@
         }
     },
     "require-dev": {
+        "hautelook/alice-bundle": "^2.11",
         "symfony/maker-bundle": "^1.45"
     }
 }
