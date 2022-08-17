@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\PropertyRepository;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints\Length;
@@ -32,6 +33,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
     ],
 )]
 #[UniqueEntity('title')]
+#[ORM\HasLifecycleCallbacks]
 class Property
 {
     #[ORM\Id]
@@ -44,7 +46,7 @@ class Property
     #[Groups(['media_object:read', 'property:read', 'property:write'])]
     #[
         NotBlank,
-        Length(min: 5, max: 30)
+        Length(min: 5, max: 100)
     ]
     private ?string $title = null;
 
@@ -52,7 +54,7 @@ class Property
     #[Groups(['property:read', 'property:write'])]
     #[
         NotBlank,
-        Length(min: 5, max: 255)
+        Length(min: 10, max: 255)
     ]
     private ?string $description = null;
 
@@ -134,11 +136,11 @@ class Property
     private ?bool $sold = false;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['property:read'])]
+    #[Groups(['property:read', 'property:write'])]
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['property:read'])]
+    #[Groups(['property:read', 'property:write'])]
     private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\ManyToMany(targetEntity: Options::class, inversedBy: 'properties')]
@@ -147,14 +149,22 @@ class Property
 
     #[ORM\OneToMany(mappedBy: 'property', targetEntity: MediaObject::class, cascade: ["persist", "remove"])]
     #[Groups(['property:read', 'property:write'])]
+    #[ApiSubresource]
     private Collection $pictures;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTime();
-        $this->updatedAt = new \DateTime();
+        $this->createdAt = new \DateTime('now');   
         $this->options = new ArrayCollection();
         $this->pictures = new ArrayCollection();
+    }
+
+
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
+    public function updateModifiedDatetime() {
+        // update the modified time
+        $this->updatedAt = new \DateTime('now');
     }
 
     public function getId(): ?int

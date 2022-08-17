@@ -8,22 +8,46 @@ use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: OptionsRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['options:read']],
+    denormalizationContext: ['groups' => ['options:write']],
+    paginationItemsPerPage: 10,
+    paginationMaximumItemsPerPage: 100,
+    paginationClientItemsPerPage: true,
+    collectionOperations: [
+        'get',
+        'post'
+    ],
+    itemOperations: [
+        'get',
+        'patch',
+        'delete'
+    ],
+)]
+#[UniqueEntity('name')]
 class Options
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['property:read'])]
+    #[Groups(['property:read', 'options:read'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups(['property:read'])]
+    #[ORM\Column(name: 'name', length: 255)]
+    #[Groups(['property:read', 'options:read', 'options:write'])]
+    #[
+        NotBlank,
+        Length(min: 2, max: 30)
+    ]
     private ?string $name = null;
 
     #[ORM\ManyToMany(targetEntity: Property::class, mappedBy: 'options')]
+    #[Groups(['options:write', 'options:read'])]
     private Collection $properties;
 
     public function __construct()
